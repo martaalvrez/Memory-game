@@ -1,6 +1,9 @@
 # Memory-game
 A web project designed to train short-term and working memory through a timed visual memory game.  
 
+Live demo  
+[Click here to play the Memory Game](https://martaalvrez.github.io/Memory-game/)
+
 The project contains three HTML pages:
 - **index.html** — Page with a brief explanation about memory.
 - **instruccionesJuego.html** — Page with instructions on how to play the game.

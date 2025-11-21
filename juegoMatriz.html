@@ -51,7 +51,7 @@
   <div class="container text-center mt-4"> <!-- caja principal, centra el texto -->
     <!-- cada div dentro del div principal (caja principal), es un bloque. Un componente-->
     <h1>Memory Game</h1>
-    <p>Look carefully at the grid for 15 seconds and try to remember the numbers and words!</p>
+    <p>Look carefully at the grid for 20 seconds and try to remember the numbers and words!</p>
 
 
     <!-- TEMPORIZADOR -->
@@ -185,9 +185,9 @@
       const celdas = document.querySelectorAll("#gridInput input"); // coge las celdas de la matriz vacía
       celdas.forEach(input => input.value = ""); // borrar contenido cada vez que le doy al play para que luego no haya celdas ya escritas
 
-      // Iniciar el contador de 15 segundos
+      // Iniciar el contador de 20 segundos
       // let TrialTimer = 5;
-      let timeLeft = 15; 
+      let timeLeft = 20; 
       timerDiv.textContent = "TIMER = " + timeLeft; /* para que se vea por pantalla el tiempo que queda */
 
       // set interval(funcion, 1000 milisegundos)

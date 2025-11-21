@@ -6,7 +6,7 @@ The project contains three HTML pages:
 **instruccionesJuego.html** — Page with instructions on how to play the game.
 **juegoMatriz.html** — Memory game with timers and an interactive grid.
 
-##How the game works:
+## How the game works:
 - A grid appears with 12 random words and numbers 
 - You have 15 seconds to memorize the items  
 - The grid disappears and an empty one appears  

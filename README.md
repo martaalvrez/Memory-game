@@ -2,7 +2,7 @@
 A web project designed to train short-term and working memory through a timed visual memory game.  
 
 The project contains three HTML pages:
-- **intentoPagWeb.html** — Page with a brief explanation about memory.
+- **index.html** — Page with a brief explanation about memory.
 - **instruccionesJuego.html** — Page with instructions on how to play the game.
 - **juegoMatriz.html** — Memory game with timers and an interactive grid.
 

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Grid Game</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+
+    .oculto {
+      display: none; /* oculta cualquier elemento que llame a la clase oculto*/
+    }
+    body {
+      font-family: Arial, sans-serif; /* tipo de letra */
+      background-color: #f8f9fa; /* color de fondo */
+      text-align: center;
+      padding-top: 40px;
+    }
+    h1 {
+      margin-bottom: 20px; /* espacio debajo del título */
+    }
+    .cell { /* solo los elementos con la clase cell */
+      border: 2px solid #333; /* borde gris oscuro */
+      display: flex; /* centra el contenido de la celda */
+      align-items: center;
+      justify-content: center;
+      height: 80px; /* tamaño de cada cuadrado */
+      font-size: 20px;
+      background-color: white; 
+      border-radius: 10px; /* bordes redondeados */
+      margin-bottom: 10px; 
+      margin: 5px; /* espacio entre celdas */
+    }
+    input.cell { /* solo inputs con clase cell --> palabras de las celdas */
+      text-align: center;
+      text-transform: uppercase; /* poner en mayúsuclas las palabras */
+      width: 100%; 
+      height: 100%;
+      border: none;
+      outline: none;
+      background-color: white;
+    }
+    
+  </style>
+</head>
+    
+<body>
+  <div class="container text-center mt-4"> <!-- caja principal, centra el texto -->
+    <!-- cada div dentro del div principal (caja principal), es un bloque. Un componente-->
+    <h1>Memory Game</h1>
+    <p>Look carefully at the grid for 15 seconds and try to remember the numbers and words!</p>
+
+
+    <!-- TEMPORIZADOR -->
+    <div id="timer" class="oculto"></div> <!-- al principio oculto hasta que se da a play -->
+    <!-- TEMPORIZADOR PARA QUE EL USUARIO ESCRIBA LAS RESPUESTAS -->
+    <div id="answersTimer" class="oculto"></div> <!-- al principio oculto hasta que se da a check -->
+
+
+    <!-- MATRIZ CON PALABRAS OCULTA HASTA QUE SE DA A PLAY -->
+    <div id="gridWords" class="oculto">
+      <div class="row justify-content-center"> <!-- por filas -->
+        <div class="col-3 cell"></div> <!-- col-3 porque Bootstrap divide la pantalla en 12, y 12/3 = 4 = 4 columnas, 3 filas-->
+        <div class="col-3 cell"></div>  
+        <div class="col-3 cell"></div>
+        <div class="col-3 cell"></div>
+
+        <div class="col-3 cell"></div>
+        <div class="col-3 cell"></div>
+        <div class="col-3 cell"></div>
+        <div class="col-3 cell"></div>
+
+        <div class="col-3 cell"></div>
+        <div class="col-3 cell"></div>
+        <div class="col-3 cell"></div>
+        <div class="col-3 cell"></div>
+      </div>
+    </div>
+
+    <!-- MATRIZ VACÍA AL PRINCIPIO VISIBLE HASTA QUE SE LE DA A PLAY -->
+    <div id="gridInput"> 
+      <div class="row justify-content-center">
+        <div class="col-3 cell"><input type="text" class="cell"></div> <!-- input text: para que el usuario escriba lo que quiera en la celda-->
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+        <div class="col-3 cell"><input type="text" class="cell"></div> <!-- input: para que el usuario pueda editar la celda. escribir, elegir opciones, etc -->
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+        <div class="col-3 cell"><input type="text" class="cell"></div>
+      </div>
+    </div>
+
+    <!-- Botones DE PLAY Y CHECK -->
+    <button id="playBtn" class="btn btn-success mt-3 me-2">Play</button> <!--success: color verde -->
+    <button id = "checkBtn" class="btn btn-primary mt-3">Check</button> <!--primary: color azul -->
+  </div>
+
+  <script> 
+
+    //JAVASCRIPT!
+
+    const correctAnswersPool = [ // pool de palabras para seleccionar luego aleatoriamente en la matriz y jugar
+    "RED","BLUE","GREEN","YELLOW","PINK","ORANGE","PURPLE",
+    "DOG","CAT","MOON","SUN","STAR","TREE","WATER","FIRE",
+    "12","23","34","45","56","67","78","89","90","15","72",
+    "39","MADRID","LISBOA","BOOM","20","78","123","475","2",
+    "5746","MOUSE","SAND","HAPPY","TIME","904","721","560","HOUSE"
+    ];
+
+    // const define constante, variable que no puede cambiar
+    // let define variable que si que puede cambiar
+
+    const playBtn = document.getElementById("playBtn"); /* se selecciona mediante id */
+    const gridWords = document.getElementById("gridWords"); /* se selecciona mediante id */
+    const gridInput = document.getElementById("gridInput"); /* se selecciona mediante id */
+    const timerDiv = document.getElementById("timer"); /* se selecciona mediante id */
+    const timerAnswer = document.getElementById("answersTimer"); /* se selecciona mediante id */
+
+    // MÉTODO PARA OBTENER 12 PALABRAS ALEATORIAS 
+    function getRandomWords() {
+      const randomWords = [...correctAnswersPool].sort(() => 0.5 - Math.random()); //... porque así copia el array original como copia independiente y no modifica la original
+      //ordena aleatoriamente las palabras
+      return randomWords.slice(0, 12); //coge 12 palabras
+    }
+
+    // MÉTODO PARA RELLENAR LAS CELDAS DE LA MATRIZ CON LAS 12 PALABRAS SELECCIONADAS
+    function fillGrid(words){ // se le pasan las 12 palabras generadas aleatoriamente para que las coloque en las celdas
+      const cells = document.querySelectorAll("#gridWords .cell"); // #: selecciona elementos con ese id y el .: selecciona elementos con esa clase
+      // se seleccionan las celdas de la matriz que se hace visible al darle al play para, al darle play, que se vean las palabras que hay que memorizar 
+      cells.forEach((cell, index) => { //recorre cada celda
+      cell.textContent = words[index]; // coloca cada palabra de la lista introducida en cada celda 
+    });
+    }
+
+    let correctAnswers = []; // se llenará aleatoriamente en cada partida --> no se puede poner dentro del play porque entonces check no puede acceder a él
+    let countdown = null; // temporizador de mirar la matriz
+    let writeCountdown = null; // temporizador de escribir respuestas
+    
+    // --------------- PLAY --------------- //
+
+    playBtn.addEventListener("click", function() { /* al pulsar el botón play*/
+     // console.log("playBtn =", playBtn);
+
+     // Hay que generar la matriz con palabras aleatorias y hacer visible el temporizador
+
+     //let correctAnswers = [];  // se llenará aleatoriamente en cada partida --> no puede ir aquí porque entonces el botón check no puede acceder a esta variable
+
+      // Detener temporizadores anteriores si existían, por ejemplo si le damos al play antes de acabar el check 
+      if (countdown !== null) {
+        clearInterval(countdown);
+        countdown = null;
+      }
+
+      if (writeCountdown !== null) {
+        clearInterval(writeCountdown);
+        writeCountdown = null;
+      }
+
+      timerAnswer.classList.add("oculto");  // Ocultar temporizador de escribir si estaba activo y visible porque es la segunda vez que le damos a play
+
+      // Desbloquear inputs para nueva partida
+      const inputs = document.querySelectorAll("#gridInput input");
+      inputs.forEach(input => {
+      input.value = "";
+      input.disabled = false;  // para permitir escribir si le volveoms a dar al play despues del check y que no se mantengan bloqueados
+      });
+
+     correctAnswers = getRandomWords(); // genera la lista de 12 palabras aleatorias que serán las palabras de la matriz cada vez que se dee a play. 
+     //VAN CAMBIANDO PARA PODER JUGAR VARIAS VECES
+
+     fillGrid(correctAnswers); // para generar la matriz con cada palabra de la lista en cada celda 
+
+      gridWords.classList.remove("oculto"); /* se muestra la matriz con las palabras aleatorias */
+      gridInput.classList.add("oculto"); /* matriz vacía oculta */
+      timerDiv.classList.remove("oculto"); /* se muestra el temporizador */
+
+      const celdas = document.querySelectorAll("#gridInput input"); // coge las celdas de la matriz vacía
+      celdas.forEach(input => input.value = ""); // borrar contenido cada vez que le doy al play para que luego no haya celdas ya escritas
+
+      // Iniciar el contador de 15 segundos
+      // let TrialTimer = 5;
+      let timeLeft = 15; 
+      timerDiv.textContent = "TIMER = " + timeLeft; /* para que se vea por pantalla el tiempo que queda */
+
+      // set interval(funcion, 1000 milisegundos)
+      countdown = setInterval(() => { 
+      // el timeleft que va bajando cada segundo. El intervalo es cada 1000 milisegundos   
+        timeLeft--; /* cada segundo, resta 1*/
+        timerDiv.textContent = "TIMER = " + timeLeft; // muestra por pantalla cada número 
+
+        if (timeLeft === 0) { // cuando se acabe el tiempo 
+          clearInterval(countdown); // para el temporizador, no sigue bajando
+          timerDiv.classList.add("oculto"); // el contador desaparece 
+
+          /* Ocultamos la matriz con palabras y mostramos la vacía --> INICIAMOS TEMPORIZADOR PARA ESCRIBIR RESPUESTAS */
+          gridWords.classList.add("oculto");
+          gridInput.classList.remove("oculto");
+
+          /* INICIAMOS TEMPORIZADOR PARA ESCRIBIR RESPUESTAS */
+          // let trialTimeranswer = 6;
+          let writeTime = 60; // 1 minuto para que el usuario escriba las respuestas
+          
+          timerAnswer.textContent = "WRITE TIME = " + writeTime; // para que se muestre por pantalla el tiempo
+          timerAnswer.classList.remove("oculto"); // se muestrat el temporizador
+
+          // set interval(funcion, 1000 milisegundos)
+          writeCountdown = setInterval(() => {   
+            writeTime--; /* cada segundo, resta 1*/
+            timerAnswer.textContent = "TIME LEFT = " + writeTime ; // muestra el temporizador por pantalla mostrando cada número 
+
+            if (writeTime === 0) { // cuando se acabe el tiempo 
+              clearInterval(writeCountdown); // para el temporizador, no sigue bajando
+              timerAnswer.classList.add("oculto"); // el contador desaparece 
+
+              // Bloquear inputs para que el usuario no pueda seguir escribiendo en las celdas 
+              const inputs = document.querySelectorAll("#gridInput input");
+              inputs.forEach(input => input.disabled = true);
+
+              // Ejecutar CHECK automáticamente al acabar el tiempo
+              checkBtn.click();
+
+            }
+          }, 1000);
+
+        }
+      }, 1000); /* el intevalo, en milisegundos, que se repite la función de antes. cada segundo se baja un número en el contador */
+    });
+
+
+    // --------------- CHECK --------------- //
+
+    const checkBtn = document.getElementById("checkBtn"); // se selecciona mediante el id
+
+    checkBtn.addEventListener("click", function() { // al pulsar el botón check 
+    //console.log("checkBtn =", checkBtn);
+
+    const usersAnswers = document.querySelectorAll("#gridInput input"); // coge los inputs de la matriz escrita por el usuario (por id) 
+
+    let score = 0; // variable de la puntuación 
+
+    usersAnswers.forEach((input, index) => { // recorre cada respuesta del usuario en el orden de las celdas y lo va comparando 
+    const userValue = input.value.trim().toUpperCase(); /* .value: el valor que escribe el usuario, .trim quita espacios al principio y al final para que no haya errores al comparar*/
+
+    const correctValue = correctAnswers[index].toUpperCase(); // coge cada palabra de la matriz inicial de la lista de 12 palabras creada en play con la repuesta correcta. Cada vez que hace el bucle el index va aumentando +1 y va comparando cada respuesta con la del usuario
+
+    if (userValue === correctValue) { /* si la repuesta del usuario es igual a la de la matriz inicial, es correcto y suma un punto al score */
+      score++;
+    } 
+  }); // acaba el for each
+
+    // alert para que salga el mensaje por pantalla
+  alert(`You got ${score} out of ${correctAnswers.length} correct!`); // comillas simples al revés para poder añadir variables 
+   // console.log("Score final:", score);
+
+});
+
+            /*document.getElementById("playBtn").addEventListener("click",function(e){
+            document.getElementById("gridInput").classList.add("oculto");
+            document.getElementById("gridWords").classList.remove("oculto"); 
+            });*/
+    </script>
+</body>
+</html>
